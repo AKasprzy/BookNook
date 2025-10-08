@@ -1,8 +1,6 @@
-# --- Docker build optimization ---
 export COMPOSE_DOCKER_CLI_BUILD=1
 export DOCKER_BUILDKIT=1
 
-# --- Core variables ---
 DOCKER_COMPOSE_FILE := docker-compose.yml
 APP_CONTAINER := app
 DB_CONTAINER := db
@@ -25,7 +23,7 @@ stop:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) down
 
 restart:
-	@make down && make up
+	@make stop && make run
 
 bash:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec -u "$(CURRENT_USER_ID):$(CURRENT_GROUP_ID)" $(APP_CONTAINER) bash
@@ -46,7 +44,8 @@ test:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(APP_CONTAINER) php artisan test
 
 dev:
-	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(NODE_CONTAINER) npm run dev
+	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d $(NODE_CONTAINER)
+	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(NODE_CONTAINER) sh -c "npm ci && npm run dev"
 
 pgshell:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(DB_CONTAINER) psql -U laravel -d laravel
