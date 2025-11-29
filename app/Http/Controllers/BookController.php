@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response as Status;
 
 class BookController extends Controller

@@ -25,7 +25,7 @@ stop:
 restart:
 	@make stop && make run
 
-bash:
+shell:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec -u "$(CURRENT_USER_ID):$(CURRENT_GROUP_ID)" $(APP_CONTAINER) bash
 
 root-bash:
@@ -58,5 +58,9 @@ status:
 
 fresh:
 	@make down && make build && make up && make migrate
+
+fix:
+	@docker compose exec app ./vendor/bin/pint
+
 
 .PHONY: check-env build up down restart bash root-bash migrate seed queue test dev pgshell logs status fresh

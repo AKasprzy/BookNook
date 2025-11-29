@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use App\Http\Requests\StoreBookEditionRequest;
 use App\Http\Requests\UpdateBookEditionRequest;
 use App\Http\Resources\BookEditionResource;
 use App\Models\BookEdition;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response as Status;
 
 class BookEditionController extends Controller
@@ -30,7 +30,9 @@ class BookEditionController extends Controller
 
     public function store(StoreBookEditionRequest $request): JsonResponse
     {
-        $bookEdition = BookEdition::create($request->validated());
+        $data = $request->validated();
+        $bookEdition = BookEdition::create($data);
+        $bookEdition->load('book.genres', 'book.motifs');
 
         return response()->json([
             'message' => 'Book edition created successfully.',
@@ -40,8 +42,9 @@ class BookEditionController extends Controller
 
     public function update(UpdateBookEditionRequest $request, BookEdition $bookEdition): JsonResponse
     {
-        $bookEdition->update($request->validated());
-        $bookEdition->load('book');
+        $data = $request->validated();
+        $bookEdition->update($data);
+        $bookEdition->load('book.genres', 'book.motifs');
 
         return response()->json([
             'message' => 'Book edition updated successfully.',
@@ -53,8 +56,6 @@ class BookEditionController extends Controller
     {
         $bookEdition->delete();
 
-        return response()->json([
-            'message' => 'Book edition deleted successfully.',
-        ]);
+        return response()->json(['message' => 'Book edition deleted successfully.']);
     }
 }
