@@ -122,5 +122,4 @@ class AuthTest extends TestCase
                 'message' => 'Logged out successfully',
             ]);
     }
-
 }

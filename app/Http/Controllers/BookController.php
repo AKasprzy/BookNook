@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateBookRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response as Status;
 
 class BookController extends Controller
@@ -30,17 +31,41 @@ class BookController extends Controller
 
     public function store(StoreBookRequest $request): JsonResponse
     {
-        $data = $request->validated();
-        $book = Book::create($data);
+        return DB::transaction(function () use ($request) {
 
-        return response()->json([
-            'message' => 'Book created successfully.',
-            'data' => new BookResource($book),
-        ], Status::HTTP_CREATED);
+            $data = $request->validated();
+
+            $book = Book::create([
+                'title' => $data['title'],
+                'original_language' => $data['original_language'],
+                'author' => $data['author'],
+                'original_publication_date' => $data['original_publication_date'] ?? null,
+                'series' => $data['series'] ?? null,
+            ]);
+
+            if (! empty($data['genre_ids'])) {
+                $book->genres()->sync($data['genre_ids']);
+            }
+
+            if (! empty($data['motif_ids'])) {
+                $book->motifs()->sync($data['motif_ids']);
+            }
+
+            $book->editions()->create($data['edition']);
+
+            $book->load('editions', 'genres', 'motifs');
+
+            return response()->json([
+                'message' => 'Book and first edition created successfully.',
+                'data' => new BookResource($book),
+            ], Status::HTTP_CREATED);
+        });
     }
 
     public function update(UpdateBookRequest $request, Book $book): JsonResponse
     {
+        $this->authorize('update', $book);
+
         $data = $request->validated();
         $book->update($data);
         $book->load('editions');
@@ -53,6 +78,8 @@ class BookController extends Controller
 
     public function destroy(Book $book): JsonResponse
     {
+        $this->authorize('delete', $book);
+
         $book->delete();
 
         return response()->json([

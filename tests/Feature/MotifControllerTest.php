@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Motif;
 use App\Models\User;
 use Symfony\Component\HttpFoundation\Response as Http;
@@ -21,26 +22,28 @@ class MotifControllerTest extends TestCase
 
     protected Motif $motif;
 
-    protected array $motifs;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->motif = Motif::factory()->create();
-        $this->motifs = Motif::factory()->count(10)->create()->all();
 
         $this->user = User::factory()->create();
-        $this->moderator = User::factory()->moderator()->create();
-        $this->admin = User::factory()->admin()->create();
-        $this->superadmin = User::factory()->superAdmin()->create();
+
+        $this->moderator = User::factory()->create();
+        $this->moderator->assignRole(Role::Moderator->value);
+
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole(Role::Admin->value);
+
+        $this->superadmin = User::factory()->create();
+        $this->superadmin->assignRole(Role::SuperAdmin->value);
     }
 
     public function test_index_returns_motifs(): void
     {
-        $response = $this->getJson('/api/motifs');
-
-        $response->assertStatus(Http::HTTP_OK)
+        $this->getJson('/api/motifs')
+            ->assertStatus(Http::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [
                     '*' => ['id', 'name'],
@@ -52,7 +55,9 @@ class MotifControllerTest extends TestCase
     {
         $this->getJson("/api/motifs/{$this->motif->id}")
             ->assertStatus(Http::HTTP_OK)
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJsonStructure([
+                'data' => ['id', 'name'],
+            ]);
     }
 
     public function test_guest_cannot_create_motif(): void
@@ -65,7 +70,7 @@ class MotifControllerTest extends TestCase
 
     public function test_user_without_role_cannot_create_update_or_delete_motif(): void
     {
-        $payload = ['name' => 'Unauthorized Update'];
+        $payload = ['name' => 'Unauthorized'];
 
         $this->actingAs($this->user)
             ->postJson('/api/motifs', $payload)
@@ -80,21 +85,21 @@ class MotifControllerTest extends TestCase
             ->assertStatus(Http::HTTP_FORBIDDEN);
     }
 
-    public function test_moderator_can_create_update_and_delete_motif(): void
+    public function test_moderator_cannot_create_update_or_delete_motif(): void
     {
-        $payload = Motif::factory()->make()->toArray();
+        $payload = ['name' => 'Moderator Try'];
 
         $this->actingAs($this->moderator)
             ->postJson('/api/motifs', $payload)
-            ->assertStatus(Http::HTTP_CREATED);
+            ->assertStatus(Http::HTTP_FORBIDDEN);
 
         $this->actingAs($this->moderator)
-            ->putJson("/api/motifs/{$this->motif->id}", ['name' => 'Moderator Updated'])
-            ->assertStatus(Http::HTTP_OK);
+            ->putJson("/api/motifs/{$this->motif->id}", $payload)
+            ->assertStatus(Http::HTTP_FORBIDDEN);
 
         $this->actingAs($this->moderator)
             ->deleteJson("/api/motifs/{$this->motif->id}")
-            ->assertStatus(Http::HTTP_OK);
+            ->assertStatus(Http::HTTP_FORBIDDEN);
     }
 
     public function test_admin_can_create_update_and_delete_motif(): void

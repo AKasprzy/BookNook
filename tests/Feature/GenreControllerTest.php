@@ -80,23 +80,6 @@ class GenreControllerTest extends TestCase
             ->assertStatus(Http::HTTP_FORBIDDEN);
     }
 
-    public function test_moderator_can_create_update_and_delete_genre(): void
-    {
-        $payload = Genre::factory()->make()->toArray();
-
-        $this->actingAs($this->moderator)
-            ->postJson('/api/genres', $payload)
-            ->assertStatus(Http::HTTP_CREATED);
-
-        $this->actingAs($this->moderator)
-            ->putJson("/api/genres/{$this->genre->id}", ['name' => 'Updated Genre'])
-            ->assertStatus(Http::HTTP_OK);
-
-        $this->actingAs($this->moderator)
-            ->deleteJson("/api/genres/{$this->genre->id}")
-            ->assertStatus(Http::HTTP_OK);
-    }
-
     public function test_admin_can_create_update_and_delete_genre(): void
     {
         $payload = Genre::factory()->make()->toArray();

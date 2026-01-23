@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBookEditionRequest;
 use App\Http\Requests\UpdateBookEditionRequest;
 use App\Http\Resources\BookEditionResource;
+use App\Models\Book;
 use App\Models\BookEdition;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response as Status;
@@ -28,11 +29,12 @@ class BookEditionController extends Controller
         ]);
     }
 
-    public function store(StoreBookEditionRequest $request): JsonResponse
+    public function store(Book $book, StoreBookEditionRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $bookEdition = BookEdition::create($data);
-        $bookEdition->load('book.genres', 'book.motifs');
+        unset($data['book_id']);
+
+        $bookEdition = $book->editions()->create($data);
 
         return response()->json([
             'message' => 'Book edition created successfully.',
@@ -42,9 +44,10 @@ class BookEditionController extends Controller
 
     public function update(UpdateBookEditionRequest $request, BookEdition $bookEdition): JsonResponse
     {
+        $this->authorize('update', $bookEdition);
+
         $data = $request->validated();
         $bookEdition->update($data);
-        $bookEdition->load('book.genres', 'book.motifs');
 
         return response()->json([
             'message' => 'Book edition updated successfully.',
@@ -54,8 +57,29 @@ class BookEditionController extends Controller
 
     public function destroy(BookEdition $bookEdition): JsonResponse
     {
+        $this->authorize('delete', $bookEdition);
+
+        $book = $bookEdition->book;
+
+        if ($book->editions()->count() <= 1) {
+            return response()->json([
+                'message' => 'A book must have at least one edition.',
+            ], Status::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         $bookEdition->delete();
 
-        return response()->json(['message' => 'Book edition deleted successfully.']);
+        return response()->json([
+            'message' => 'Book edition deleted successfully.',
+        ]);
+    }
+
+    public function count(): JsonResponse
+    {
+        $total = BookEdition::count();
+
+        return response()->json([
+            'total_editions' => $total,
+        ], Status::HTTP_OK);
     }
 }

@@ -14,13 +14,11 @@ class StoreShelveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_id' => ['required', 'exists:books,id'],
+            'book_edition_id' => ['required', 'exists:book_editions,id'],
             'status' => ['nullable', 'in:read,reading,tbr,dnf'],
             'times_read' => ['nullable', 'integer', 'min:0'],
             'favourite' => ['boolean'],
             'notes' => ['nullable', 'string'],
-            'tags' => ['sometimes', 'array'],
-            'tags.*' => ['string', 'max:50'],
         ];
     }
 }

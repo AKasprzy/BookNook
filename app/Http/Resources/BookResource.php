@@ -18,8 +18,8 @@ class BookResource extends JsonResource
             'series' => $this->series,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'genres' => GenreResource::collection($this->book->genres),
-            'motifs' => MotifResource::collection($this->book->motifs),
+            'genres' => GenreResource::collection($this->whenLoaded('genres')),
+            'motifs' => MotifResource::collection($this->whenLoaded('motifs')),
             'editions' => BookEditionResource::collection($this->whenLoaded('editions')),
         ];
     }

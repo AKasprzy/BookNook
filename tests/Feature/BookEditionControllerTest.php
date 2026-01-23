@@ -64,19 +64,20 @@ class BookEditionControllerTest extends TestCase
 
     public function test_guest_cannot_create_book_edition(): void
     {
+        $book = Book::factory()->create();
         $payload = BookEdition::factory()->make()->toArray();
 
-        $this->postJson('/api/book-editions', $payload)
+        $this->postJson("/api/books/{$book->id}/editions", $payload)
             ->assertStatus(Http::HTTP_UNAUTHORIZED);
     }
 
     public function test_authenticated_user_can_create_book_edition(): void
     {
         $book = Book::factory()->create();
-        $payload = BookEdition::factory()->make(['book_id' => $book->id])->toArray();
+        $payload = BookEdition::factory()->make()->toArray();
 
         $this->actingAs($this->user)
-            ->postJson('/api/book-editions', $payload)
+            ->postJson("/api/books/{$book->id}/editions", $payload)
             ->assertStatus(Http::HTTP_CREATED)
             ->assertJsonStructure([
                 'message',
@@ -110,7 +111,10 @@ class BookEditionControllerTest extends TestCase
                 ],
             ]);
 
-        $this->assertDatabaseHas('book_editions', ['book_id' => $book->id]);
+        $this->assertDatabaseHas('book_editions', [
+            'book_id' => $book->id,
+            'edition_title' => $payload['edition_title'],
+        ]);
     }
 
     public function test_user_without_role_cannot_update_or_delete_book_edition(): void
@@ -126,17 +130,17 @@ class BookEditionControllerTest extends TestCase
             ->assertStatus(Http::HTTP_FORBIDDEN);
     }
 
-    public function test_moderator_can_update_and_delete_book_edition(): void
+    public function test_moderator_cannot_update_or_delete_book_edition(): void
     {
         $payload = ['edition_title' => 'Moderator Updated'];
 
         $this->actingAs($this->moderator)
             ->putJson("/api/book-editions/{$this->edition->id}", $payload)
-            ->assertStatus(Http::HTTP_OK);
+            ->assertStatus(Http::HTTP_FORBIDDEN);
 
         $this->actingAs($this->moderator)
             ->deleteJson("/api/book-editions/{$this->edition->id}")
-            ->assertStatus(Http::HTTP_OK);
+            ->assertStatus(Http::HTTP_FORBIDDEN);
     }
 
     public function test_admin_can_update_and_delete_book_edition(): void
@@ -175,6 +179,7 @@ class BookEditionControllerTest extends TestCase
         Review::factory()->create(['book_id' => $book->id, 'rating' => 4]);
 
         $expectedAverage = (float) Review::where('book_id', $book->id)->avg('rating');
+
         $response = $this->getJson("/api/book-editions/{$edition->id}")
             ->assertStatus(Http::HTTP_OK);
 
@@ -204,6 +209,7 @@ class BookEditionControllerTest extends TestCase
 
         $response = $this->getJson("/api/book-editions/{$edition->id}")
             ->assertStatus(Http::HTTP_OK);
+
         $this->assertEquals(round($initialAverage, 1), $response->json('data.average_rating'));
 
         Review::factory()->create(['book_id' => $book->id, 'rating' => 1]);
@@ -213,6 +219,7 @@ class BookEditionControllerTest extends TestCase
 
         $response = $this->getJson("/api/book-editions/{$edition->id}")
             ->assertStatus(Http::HTTP_OK);
+
         $this->assertEquals(round($newAverage, 1), $response->json('data.average_rating'));
     }
 }

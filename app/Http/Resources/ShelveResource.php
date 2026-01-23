@@ -12,7 +12,7 @@ class ShelveResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'book_id' => $this->book_id,
+            'book_edition_id' => $this->book_edition_id,
             'status' => $this->status,
             'times_read' => $this->times_read,
             'favourite' => $this->favourite,

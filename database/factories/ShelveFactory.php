@@ -2,7 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Book;
+use App\Enums\BookStatus;
+use App\Models\BookEdition;
 use App\Models\Shelve;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -15,8 +16,8 @@ class ShelveFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'book_id' => Book::factory(),
-            'status' => $this->faker->optional()->randomElement(['read', 'reading', 'tbr', 'dnf']),
+            'book_edition_id' => BookEdition::factory(),
+            'status' => $this->faker->randomElement(array_column(BookStatus::cases(), 'value')),
             'times_read' => $this->faker->numberBetween(0, 10),
             'favourite' => $this->faker->boolean(25),
             'notes' => $this->faker->optional()->paragraph(),

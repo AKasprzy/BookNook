@@ -6,11 +6,14 @@ use App\Http\Requests\StoreGenreRequest;
 use App\Http\Requests\UpdateGenreRequest;
 use App\Http\Resources\GenreResource;
 use App\Models\Genre;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response as Status;
 
 class GenreController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(): JsonResponse
     {
         return GenreResource::collection(Genre::all())->response();
@@ -23,6 +26,8 @@ class GenreController extends Controller
 
     public function store(StoreGenreRequest $request): JsonResponse
     {
+        $this->authorize('create', Genre::class);
+
         $genre = Genre::create($request->validated());
 
         return response()->json([
@@ -33,6 +38,8 @@ class GenreController extends Controller
 
     public function update(UpdateGenreRequest $request, Genre $genre): JsonResponse
     {
+        $this->authorize('update', $genre);
+
         $genre->update($request->validated());
 
         return response()->json([
@@ -43,6 +50,8 @@ class GenreController extends Controller
 
     public function destroy(Genre $genre): JsonResponse
     {
+        $this->authorize('delete', $genre);
+
         $genre->delete();
 
         return response()->json([

@@ -23,6 +23,8 @@ class MotifController extends Controller
 
     public function store(StoreMotifRequest $request): JsonResponse
     {
+        $this->authorize('create', Motif::class);
+
         $motif = Motif::create($request->validated());
 
         return response()->json([
@@ -33,6 +35,8 @@ class MotifController extends Controller
 
     public function update(UpdateMotifRequest $request, Motif $motif): JsonResponse
     {
+        $this->authorize('update', $motif);
+
         $motif->update($request->validated());
 
         return response()->json([
@@ -43,6 +47,8 @@ class MotifController extends Controller
 
     public function destroy(Motif $motif): JsonResponse
     {
+        $this->authorize('delete', $motif);
+
         $motif->delete();
 
         return response()->json([

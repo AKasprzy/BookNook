@@ -14,7 +14,6 @@ class UpdateBookEditionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_id' => ['sometimes', 'exists:books,id'],
             'edition_title' => ['sometimes', 'string', 'max:255'],
             'edition_publication_date' => ['nullable', 'date'],
             'format' => ['nullable', 'string', 'max:255'],

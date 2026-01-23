@@ -18,8 +18,6 @@ class UpdateShelveRequest extends FormRequest
             'times_read' => ['nullable', 'integer', 'min:0'],
             'favourite' => ['boolean'],
             'notes' => ['nullable', 'string'],
-            'tags' => ['sometimes', 'array'],
-            'tags.*' => ['string', 'max:50'],
         ];
     }
 }

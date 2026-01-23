@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            GenreSeeder::class,
+            MotifSeeder::class,
+            GoogleBooksSeeder::class,
         ]);
         User::factory()->create([
             'name' => 'Test User',

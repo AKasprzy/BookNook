@@ -64,6 +64,7 @@ class BookEdition extends Model
     {
         return $this->book->motifs();
     }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);

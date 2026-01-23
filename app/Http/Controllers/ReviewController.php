@@ -40,6 +40,8 @@ class ReviewController extends Controller
 
     public function update(UpdateReviewRequest $request, Review $review): JsonResponse
     {
+        $this->authorize('update', $review);
+
         $review->update($request->validated());
 
         return ReviewResource::make($review->load(['book', 'user']))
@@ -49,6 +51,8 @@ class ReviewController extends Controller
 
     public function destroy(Review $review): JsonResponse
     {
+        $this->authorize('delete', $review);
+
         $review->delete();
 
         return response()->json(['message' => 'Review deleted successfully.']);

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Book;
+use App\Models\BookEdition;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory
@@ -18,5 +19,12 @@ class BookFactory extends Factory
             'original_publication_date' => $this->faker->optional()->date(),
             'series' => $this->faker->optional()->word(),
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (Book $book) {
+            BookEdition::factory()->for($book)->create();
+        });
     }
 }

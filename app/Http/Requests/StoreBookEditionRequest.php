@@ -6,15 +6,9 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBookEditionRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
         return [
-            'book_id' => ['required', 'exists:books,id'],
             'edition_title' => ['required', 'string', 'max:255'],
             'edition_publication_date' => ['nullable', 'date'],
             'format' => ['nullable', 'string', 'max:255'],
@@ -25,10 +19,6 @@ class StoreBookEditionRequest extends FormRequest
             'length_minutes' => ['nullable', 'integer', 'min:1'],
             'cover_url' => ['nullable', 'url'],
             'publisher' => ['nullable', 'string', 'max:255'],
-            'genre_ids' => ['sometimes', 'array'],
-            'genre_ids.*' => ['integer', 'exists:genres,id'],
-            'motif_ids' => ['sometimes', 'array'],
-            'motif_ids.*' => ['integer', 'exists:motifs,id'],
         ];
     }
 }

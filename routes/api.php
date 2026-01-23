@@ -8,6 +8,7 @@ use App\Http\Controllers\BookEditionController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\MotifController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShelveController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,10 +30,17 @@ Route::get('genres/{genre}', [GenreController::class, 'show']);
 Route::get('motifs', [MotifController::class, 'index']);
 Route::get('motifs/{motif}', [MotifController::class, 'show']);
 
+Route::get('/book-editions/count', [BookEditionController::class, 'count']);
+
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/search', [SearchController::class, 'search']);
+
+    Route::get('my-shelves', [ShelveController::class, 'myEditions']);
+    Route::get('my-shelves/status/{status}', [ShelveController::class, 'myEditionsByStatus']);
+
     Route::post('books', [BookController::class, 'store']);
 
-    Route::post('book-editions', [BookEditionController::class, 'store']);
+    Route::post('books/{book}/editions', [BookEditionController::class, 'store']);
 
     Route::get('reviews', [ReviewController::class, 'index']);
     Route::get('reviews/{review}', [ReviewController::class, 'show']);

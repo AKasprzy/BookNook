@@ -2,29 +2,16 @@
 
 namespace App\Models;
 
-use App\Enums\BookStatus;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @property int $id
- * @property int $user_id
- * @property int $book_id
- * @property BookStatus $status
- * @property int $times_read
- * @property bool $favourite
- * @property string|null $notes
- * @property Carbon $created_at
- * @property Carbon $updated_at
- */
 class Shelve extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'book_id',
+        'book_edition_id',
         'status',
         'times_read',
         'favourite',
@@ -36,7 +23,7 @@ class Shelve extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function book()
+    public function bookEdition()
     {
         return $this->belongsTo(BookEdition::class);
     }

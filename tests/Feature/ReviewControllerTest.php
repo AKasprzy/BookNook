@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Book;
 use App\Models\Review;
 use App\Models\User;
@@ -14,6 +15,10 @@ class ReviewControllerTest extends TestCase
 {
     protected User $user;
 
+    protected User $moderator;
+
+    protected User $admin;
+
     protected Review $review;
 
     protected function setUp(): void
@@ -21,7 +26,16 @@ class ReviewControllerTest extends TestCase
         parent::setUp();
 
         $this->user = User::factory()->create();
-        $this->review = Review::factory()->create(['user_id' => $this->user->id]);
+
+        $this->moderator = User::factory()->create();
+        $this->moderator->assignRole(Role::Moderator->value);
+
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole(Role::Admin->value);
+
+        $this->review = Review::factory()->create([
+            'user_id' => $this->user->id,
+        ]);
     }
 
     public function test_index_returns_paginated_reviews(): void
@@ -50,6 +64,7 @@ class ReviewControllerTest extends TestCase
     public function test_authenticated_user_can_create_review(): void
     {
         $book = Book::factory()->create();
+
         $payload = Review::factory()->make([
             'book_id' => $book->id,
             'user_id' => $this->user->id,
@@ -67,15 +82,50 @@ class ReviewControllerTest extends TestCase
             ]);
     }
 
-    public function test_user_can_update_and_delete_own_review(): void
+    public function test_user_can_update_own_review(): void
     {
         $payload = ['review_text' => 'Updated review text'];
 
         $this->actingAs($this->user)
             ->putJson("/api/reviews/{$this->review->id}", $payload)
             ->assertStatus(Http::HTTP_OK);
+    }
 
+    public function test_user_cannot_delete_own_review(): void
+    {
         $this->actingAs($this->user)
+            ->deleteJson("/api/reviews/{$this->review->id}")
+            ->assertStatus(Http::HTTP_FORBIDDEN);
+    }
+
+    public function test_moderator_can_update_any_review(): void
+    {
+        $payload = ['review_text' => 'Moderator updated text'];
+
+        $this->actingAs($this->moderator)
+            ->putJson("/api/reviews/{$this->review->id}", $payload)
+            ->assertStatus(Http::HTTP_OK);
+    }
+
+    public function test_moderator_can_delete_any_review(): void
+    {
+        $this->actingAs($this->moderator)
+            ->deleteJson("/api/reviews/{$this->review->id}")
+            ->assertStatus(Http::HTTP_OK);
+    }
+
+    public function test_admin_can_update_any_review(): void
+    {
+        $payload = ['review_text' => 'Admin updated text'];
+
+        $this->actingAs($this->admin)
+            ->putJson("/api/reviews/{$this->review->id}", $payload)
+            ->assertStatus(Http::HTTP_OK);
+    }
+
+    public function test_admin_can_delete_any_review(): void
+    {
+        $this->actingAs($this->admin)
             ->deleteJson("/api/reviews/{$this->review->id}")
             ->assertStatus(Http::HTTP_OK);
     }
