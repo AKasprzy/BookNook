@@ -8,6 +8,7 @@ use App\Http\Resources\BookEditionResource;
 use App\Models\Book;
 use App\Models\BookEdition;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response as Status;
 
 class BookEditionController extends Controller
@@ -74,12 +75,21 @@ class BookEditionController extends Controller
         ]);
     }
 
-    public function count(): JsonResponse
+    public function count()
     {
-        $total = BookEdition::count();
+        return response()->json([
+            'total_editions' => BookEdition::count(),
+        ]);
+    }
+
+    public function byFormat()
+    {
+        $data = BookEdition::select('format', DB::raw('count(*) as total'))
+            ->groupBy('format')
+            ->get();
 
         return response()->json([
-            'total_editions' => $total,
-        ], Status::HTTP_OK);
+            'data' => $data,
+        ]);
     }
 }

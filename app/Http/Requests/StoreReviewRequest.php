@@ -14,11 +14,12 @@ class StoreReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_id' => ['required', 'exists:books,id'],
+            'book_edition_id' => ['required', 'exists:book_editions,id'],
             'rating' => ['nullable', 'integer', 'between:1,10'],
             'review_text' => ['nullable', 'string'],
             'spoiler' => ['boolean'],
             'reread' => ['boolean'],
+            'reviewed_at' => ['nullable', 'date'],
         ];
     }
 }

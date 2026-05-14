@@ -14,10 +14,10 @@ class UpdateShelveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['nullable', 'in:read,reading,tbr,dnf'],
-            'times_read' => ['nullable', 'integer', 'min:0'],
-            'favourite' => ['boolean'],
+            'status' => ['sometimes', 'string'],
+            'favourite' => ['sometimes', 'boolean'],
             'notes' => ['nullable', 'string'],
+            'times_read' => ['sometimes', 'integer', 'min:0'],
         ];
     }
 }

@@ -10,8 +10,8 @@ class BookEditionResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $averageRating = Review::where('book_id', $this->book_id)->avg('rating');
-        $averageRating = $averageRating !== null ? (float) round($averageRating, 1) : null;
+        $averageRating = Review::where('book_edition_id', $this->id)->avg('rating');
+        $averageRating = $averageRating !== null ? round((float) $averageRating, 1) : null;
 
         return [
             'id' => $this->id,

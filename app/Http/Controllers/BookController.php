@@ -7,17 +7,44 @@ use App\Http\Requests\UpdateBookRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response as Status;
 
 class BookController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request)
     {
-        $perPage = request()->integer('per_page', 10);
-        $paginated = Book::paginate($perPage);
+        $query = trim((string) $request->input('q'));
 
-        return BookResource::collection($paginated)->response();
+        $books = Book::query()
+            ->with('editions')
+            ->when($query, function ($q) use ($query) {
+                $search = mb_strtolower($query);
+
+                $q->where(function ($sub) use ($search) {
+                    $sub->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(author) LIKE ?', ["%{$search}%"]);
+                });
+            })
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'data' => $books,
+        ]);
+    }
+
+    public function latest(): JsonResponse
+    {
+        $books = Book::with('editions')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return response()->json([
+            'data' => BookResource::collection($books),
+        ]);
     }
 
     public function show(Book $book): JsonResponse
@@ -32,7 +59,6 @@ class BookController extends Controller
     public function store(StoreBookRequest $request): JsonResponse
     {
         return DB::transaction(function () use ($request) {
-
             $data = $request->validated();
 
             $book = Book::create([
@@ -67,6 +93,7 @@ class BookController extends Controller
         $this->authorize('update', $book);
 
         $data = $request->validated();
+
         $book->update($data);
         $book->load('editions');
 
@@ -83,7 +110,43 @@ class BookController extends Controller
         $book->delete();
 
         return response()->json([
-            'message' => 'Book deleted successfully.',
+            'message' => 'Book hidden successfully.',
         ]);
+    }
+
+    public function forceDestroy(Book $book): JsonResponse
+    {
+        $this->authorize('delete', $book);
+
+        $book->forceDelete();
+
+        return response()->json([
+            'message' => 'Book permanently deleted.',
+        ]);
+    }
+
+    public function booksPerYear(): JsonResponse
+    {
+        $data = Book::selectRaw('EXTRACT(YEAR FROM original_publication_date) as year')
+            ->selectRaw('COUNT(*) as total')
+            ->whereNotNull('original_publication_date')
+            ->groupBy('year')
+            ->orderBy('year')
+            ->get();
+
+        return response()->json([
+            'data' => $data,
+        ], Status::HTTP_OK);
+    }
+
+    public function editionsPerBook(): JsonResponse
+    {
+        $data = Book::withCount('editions')
+            ->orderByDesc('editions_count')
+            ->get(['id', 'title']);
+
+        return response()->json([
+            'data' => $data,
+        ], Status::HTTP_OK);
     }
 }

@@ -38,4 +38,12 @@ class BookPolicy
             Role::SuperAdmin->value,
         ]);
     }
+
+    public function forceDelete(User $user, Book $book): bool
+    {
+        return $user->hasAnyRole([
+            Role::Admin->value,
+            Role::SuperAdmin->value,
+        ]);
+    }
 }

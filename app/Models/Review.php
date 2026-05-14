@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -20,11 +21,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Review extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
-        'book_id',
+        'book_edition_id',
         'rating',
         'review_text',
         'spoiler',
@@ -32,12 +33,18 @@ class Review extends Model
         'reviewed_at',
     ];
 
+    protected $casts = [
+        'spoiler' => 'boolean',
+        'reread' => 'boolean',
+        'reviewed_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function book()
+    public function bookEdition()
     {
         return $this->belongsTo(BookEdition::class);
     }

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Book;
+use App\Models\BookEdition;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -15,11 +15,11 @@ class ReviewFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'book_id' => Book::factory(),
-            'rating' => $this->faker->optional()->numberBetween(1, 10),
-            'review_text' => $this->faker->optional()->paragraph(3),
-            'spoiler' => $this->faker->boolean(20),
-            'reread' => $this->faker->boolean(15),
+            'book_edition_id' => BookEdition::factory(),
+            'rating' => $this->faker->numberBetween(1, 5),
+            'review_text' => $this->faker->paragraph(3),
+            'spoiler' => $this->faker->boolean(),
+            'reread' => $this->faker->boolean(),
             'reviewed_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
         ];
     }

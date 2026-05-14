@@ -19,6 +19,22 @@ class ShelveResource extends JsonResource
             'notes' => $this->notes,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+
+            'edition' => $this->whenLoaded('bookEdition', function () {
+                return [
+                    'id' => $this->bookEdition->id,
+                    'edition_title' => $this->bookEdition->edition_title,
+                    'cover_url' => $this->bookEdition->cover_url,
+                    'format' => $this->bookEdition->format,
+
+                    'book' => [
+                        'id' => $this->bookEdition->book->id,
+                        'title' => $this->bookEdition->book->title,
+                        'author' => $this->bookEdition->book->author,
+                        'cover_url' => $this->bookEdition->book->cover_url,
+                    ],
+                ];
+            }),
         ];
     }
 }

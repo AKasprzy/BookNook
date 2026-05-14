@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('author');
             $table->date('original_publication_date')->nullable();
             $table->string('series')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

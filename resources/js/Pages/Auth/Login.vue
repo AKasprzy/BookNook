@@ -1,100 +1,84 @@
-<script setup>
-import Checkbox from '@/Components/Checkbox.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+<script setup lang="ts">
+import { reactive } from "vue"
+import axios from "@/axios"
+import { Link } from "@inertiajs/vue3"
+import { Mail, Lock } from "lucide-vue-next"
 
-defineProps({
-    canResetPassword: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
-});
+import Button from "@/Components/ui/Button.vue"
+import Input from "@/Components/ui/Input.vue"
+import Label from "@/Components/ui/Label.vue"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/Components/ui/Card.vue"
 
-const form = useForm({
-    email: '',
-    password: '',
-    remember: false,
-});
+const form = reactive({
+    email: "",
+    password: "",
+    errors: {} as Record<string, string>,
+    processing: false,
+})
 
-const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-    });
-};
+async function submit() {
+    form.processing = true
+    form.errors = {}
+
+    try {
+        const response = await axios.post("/api/auth/login", {
+            email: form.email,
+            password: form.password,
+        })
+
+        localStorage.setItem("token", response.data.token)
+
+        axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`
+
+        window.location.href = "/home"
+    } catch (error: any) {
+        form.errors.email = error.response?.data?.message || "Login failed"
+    } finally {
+        form.processing = false
+    }
+}
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Log in" />
+    <div class="min-h-screen flex items-center justify-center bg-slate-50">
+        <div class="w-full max-w-md">
+            <Card class="shadow-xl border-none">
+                <CardHeader>
+                    <CardTitle>Login</CardTitle>
+                    <CardDescription>Access your account</CardDescription>
+                </CardHeader>
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
-            {{ status }}
+                <CardContent>
+                    <form @submit.prevent="submit" class="space-y-6">
+                        <div class="space-y-2">
+                            <Label>Email</Label>
+                            <div class="relative">
+                                <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <Input v-model="form.email" class="pl-10 h-10" type="email" required />
+                            </div>
+                            <p v-if="form.errors.email" class="text-xs text-red-500">{{ form.errors.email }}</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label>Password</Label>
+                            <div class="relative">
+                                <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <Input v-model="form.password" class="pl-10 h-10" type="password" required />
+                            </div>
+                            <p v-if="form.errors.password" class="text-xs text-red-500">{{ form.errors.password }}</p>
+                        </div>
+
+                        <Button type="submit" class="w-full" :disabled="form.processing">
+                            {{ form.processing ? "Logging in..." : "Login" }}
+                        </Button>
+
+                        <p class="text-sm text-center text-slate-600">
+                            Don’t have an account?
+                            <Link href="/register" class="text-slate-900 font-medium">Sign up</Link>
+                        </p>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
-                </label>
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Forgot your password?
-                </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
-    </GuestLayout>
+    </div>
 </template>

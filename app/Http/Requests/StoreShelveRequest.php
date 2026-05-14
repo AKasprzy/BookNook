@@ -15,10 +15,10 @@ class StoreShelveRequest extends FormRequest
     {
         return [
             'book_edition_id' => ['required', 'exists:book_editions,id'],
-            'status' => ['nullable', 'in:read,reading,tbr,dnf'],
-            'times_read' => ['nullable', 'integer', 'min:0'],
-            'favourite' => ['boolean'],
+            'status' => ['required', 'string'],
+            'favourite' => ['sometimes', 'boolean'],
             'notes' => ['nullable', 'string'],
+            'times_read' => ['sometimes', 'integer', 'min:0'],
         ];
     }
 }

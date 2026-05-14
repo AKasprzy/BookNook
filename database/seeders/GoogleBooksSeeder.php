@@ -28,7 +28,7 @@ class GoogleBooksSeeder extends Seeder
         $scored = [];
 
         foreach ($queries as $query) {
-            for ($start = 0; $start < 120; $start += 40) {
+            for ($start = 0; $start < 80; $start += 40) {
                 $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
                     'q' => 'subject:'.$query,
                     'printType' => 'books',
@@ -36,6 +36,8 @@ class GoogleBooksSeeder extends Seeder
                     'startIndex' => $start,
                     'maxResults' => 40,
                 ]);
+
+                usleep(300000);
 
                 if (! $response->successful()) {
                     continue;
@@ -45,11 +47,13 @@ class GoogleBooksSeeder extends Seeder
 
                 foreach ($items as $item) {
                     $info = $item['volumeInfo'] ?? [];
+
                     if (! isset($info['ratingsCount'])) {
                         continue;
                     }
 
                     $data = $this->normalize($item);
+
                     if (! $data) {
                         continue;
                     }
@@ -98,11 +102,14 @@ class GoogleBooksSeeder extends Seeder
 
             foreach ($data['categories'] as $cat) {
                 $parts = explode('/', $cat);
+
                 foreach ($parts as $name) {
                     $name = trim($name);
+
                     if ($name === '') {
                         continue;
                     }
+
                     $genre = Genre::query()->firstOrCreate(['name' => $name]);
                     $book->genres()->syncWithoutDetaching($genre->id);
                 }
@@ -117,6 +124,7 @@ class GoogleBooksSeeder extends Seeder
         if (! isset($info['title'])) {
             return null;
         }
+
         if (! isset($info['authors'])) {
             return null;
         }
@@ -140,9 +148,11 @@ class GoogleBooksSeeder extends Seeder
         if (! $date) {
             return null;
         }
+
         if (strlen($date) === 4) {
             return $date.'-01-01';
         }
+
         if (strlen($date) === 7) {
             return $date.'-01';
         }

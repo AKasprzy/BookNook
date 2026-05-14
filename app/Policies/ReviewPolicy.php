@@ -42,4 +42,13 @@ class ReviewPolicy
             Role::SuperAdmin->value,
         ]);
     }
+
+    public function forceDelete(User $user, Review $review): bool
+    {
+        return $user->hasAnyRole([
+            Role::Moderator->value,
+            Role::Admin->value,
+            Role::SuperAdmin->value,
+        ]);
+    }
 }

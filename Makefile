@@ -44,8 +44,8 @@ test:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(APP_CONTAINER) php artisan test
 
 dev:
-	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d $(NODE_CONTAINER)
-	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(NODE_CONTAINER) sh -c "npm ci && npm run dev"
+	@make run
+	@docker compose exec $(NODE_CONTAINER) sh -c "npm ci && npm run dev"
 
 pgshell:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(DB_CONTAINER) psql -U laravel -d laravel
@@ -57,7 +57,7 @@ status:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) ps
 
 fresh:
-	@make down && make build && make up && make migrate
+	@make down && make build && make run && make migrate
 
 fix:
 	@docker compose exec app ./vendor/bin/pint
