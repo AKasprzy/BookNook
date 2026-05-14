@@ -46,6 +46,14 @@ Route::get('reviews/by-edition', [ReviewController::class, 'byEdition']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::post('genres', [GenreController::class, 'store']);
+    Route::put('genres/{genre}', [GenreController::class, 'update']);
+    Route::delete('genres/{genre}', [GenreController::class, 'destroy']);
+
+    Route::post('motifs', [MotifController::class, 'store']);
+    Route::put('motifs/{motif}', [MotifController::class, 'update']);
+    Route::delete('motifs/{motif}', [MotifController::class, 'destroy']);
+
     Route::get('/user', [UserController::class, 'getCurrentUser']);
     Route::put('/user/settings/profile', [UserController::class, 'updateProfile']);
     Route::put('/user/settings/password', [UserController::class, 'updatePassword']);

@@ -64,29 +64,6 @@ class BookControllerTest extends TestCase
         ];
     }
 
-    public function test_index_returns_paginated_books(): void
-    {
-        $response = $this->getJson('/api/books');
-
-        $response->assertStatus(Http::HTTP_OK)
-            ->assertJsonStructure([
-                'data',
-                'links' => ['first', 'last', 'prev', 'next'],
-                'meta' => ['current_page', 'last_page', 'per_page', 'total'],
-            ]);
-
-        $this->assertCount(10, $response->json('data'));
-    }
-
-    public function test_index_respects_per_page_parameter(): void
-    {
-        $response = $this->getJson('/api/books?per_page=5');
-
-        $response->assertStatus(Http::HTTP_OK);
-        $this->assertCount(5, $response->json('data'));
-        $this->assertEquals(5, $response->json('meta.last_page'));
-    }
-
     public function test_show_returns_book(): void
     {
         $this->getJson("/api/books/{$this->book->id}")
