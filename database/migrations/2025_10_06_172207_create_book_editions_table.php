@@ -1,9 +1,9 @@
 <?php
 
+use App\Enums\BookFormat;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\BookFormat;
 
 return new class extends Migration
 {
@@ -12,7 +12,9 @@ return new class extends Migration
         Schema::create('book_editions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('book_id')->constrained()->cascadeOnDelete();
-            $table->string('format');
+            $table->string('edition_title');
+            $table->date('edition_publication_date')->nullable();
+            $table->enum('format', array_column(BookFormat::cases(), 'value'));
             $table->string('edition_language');
             $table->text('description')->nullable();
             $table->string('isbn')->nullable();
@@ -20,7 +22,6 @@ return new class extends Migration
             $table->integer('length_minutes')->nullable();
             $table->string('cover_url')->nullable();
             $table->string('publisher')->nullable();
-            $table->decimal('average_rating', 2, 1)->nullable();
             $table->timestamps();
         });
     }

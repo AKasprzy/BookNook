@@ -1,8 +1,6 @@
-# --- Docker build optimization ---
 export COMPOSE_DOCKER_CLI_BUILD=1
 export DOCKER_BUILDKIT=1
 
-# --- Core variables ---
 DOCKER_COMPOSE_FILE := docker-compose.yml
 APP_CONTAINER := app
 DB_CONTAINER := db
@@ -25,9 +23,9 @@ stop:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) down
 
 restart:
-	@make down && make up
+	@make stop && make run
 
-bash:
+shell:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec -u "$(CURRENT_USER_ID):$(CURRENT_GROUP_ID)" $(APP_CONTAINER) bash
 
 root-bash:
@@ -46,7 +44,8 @@ test:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(APP_CONTAINER) php artisan test
 
 dev:
-	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(NODE_CONTAINER) npm run dev
+	@make run
+	@docker compose exec $(NODE_CONTAINER) sh -c "npm ci && npm run dev"
 
 pgshell:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) exec $(DB_CONTAINER) psql -U laravel -d laravel
@@ -58,6 +57,10 @@ status:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) ps
 
 fresh:
-	@make down && make build && make up && make migrate
+	@make down && make build && make run && make migrate
+
+fix:
+	@docker compose exec app ./vendor/bin/pint
+
 
 .PHONY: check-env build up down restart bash root-bash migrate seed queue test dev pgshell logs status fresh
