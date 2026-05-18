@@ -76,14 +76,22 @@ onMounted(async () => {
 
                 <div class="flex items-center gap-2">
                     <div class="flex gap-1">
-                        <Star
+                        <span
                             v-for="i in 5"
                             :key="i"
-                            class="w-4 h-4"
-                            :class="i <= (review.rating ?? 0)
-                                ? 'fill-amber-400 text-amber-400'
-                                : 'text-gray-300'"
-                        />
+                            class="text-sm"
+                            :class="{
+                                'text-gray-300': i > Math.ceil((review.rating ?? 0) / 2)
+                            }"
+                        >
+                            {{
+                                i <= Math.floor((review.rating ?? 0) / 2)
+                                    ? '★'
+                                    : i === Math.ceil((review.rating ?? 0) / 2) && (review.rating ?? 0) % 2 !== 0
+                                        ? '⯨'
+                                        : '☆'
+                            }}
+                        </span>
                     </div>
 
                     <div class="flex gap-1">

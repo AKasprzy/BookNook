@@ -44,8 +44,14 @@ function formatDate(date: string) {
 
 function renderStars(rating: number | null) {
     if (!rating) return []
-    return [1, 2, 3, 4, 5].map((star) => star <= rating)
-}
+    return [1, 2, 3, 4, 5].map((star) => {
+        const value = star * 2
+
+        if (rating >= value) return 'full'
+        if (rating >= value - 1) return 'half'
+
+        return 'empty'
+    })}
 </script>
 
 <template>
@@ -93,7 +99,13 @@ function renderStars(rating: number | null) {
                                         :key="i"
                                         class="text-sm"
                                     >
-                                        {{ filled ? '★' : '☆' }}
+                                        {{
+                                            filled === 'full'
+                                                ? '★'
+                                                : filled === 'half'
+                                                    ? '⯨'
+                                                    : '☆'
+                                        }}
                                     </span>
                                 </div>
 

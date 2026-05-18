@@ -286,7 +286,15 @@
                                     <div class="flex items-center gap-2 mb-1">
                                         <p class="font-bold">Your Review</p>
                                         <div class="flex text-amber-400">
-                                            <span v-for="i in 5" :key="i">{{ i <= myReview.rating ? '★' : '☆' }}</span>
+                                            <span v-for="i in 5" :key="i">
+                                                {{
+                                                    i <= Math.floor(myReview.rating / 2)
+                                                        ? '★'
+                                                        : i === Math.ceil(myReview.rating / 2) && myReview.rating % 2 !== 0
+                                                            ? '⯨'
+                                                            : '☆'
+                                                }}
+                                            </span>
                                         </div>
                                     </div>
                                     <p class="text-slate-700 whitespace-pre-line">{{ myReview.review_text }}</p>
