@@ -29,7 +29,6 @@ class RegisterController extends Controller
         ]);
 
         $user->assignRole('user');
-        $user->sendEmailVerificationNotification();
 
         $token = $user->createToken('token')->plainTextToken;
 
