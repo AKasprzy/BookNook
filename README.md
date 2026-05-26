@@ -77,17 +77,3 @@ make dev
 ```
 
 Polecenie to instaluje zależności oraz uruchamia tryb deweloperski aplikacji frontendowej.
-
-## Aplikacja mobilna
-
-Aplikacja mobilna została zaimplementowana w technologii Flutter i znajduje się w osobnym repozytorium. Jej uruchomienie odbywa się niezależnie od backendu.
-
-Aby uruchomić aplikację mobilną lokalnie, należy wykonać następujące kroki:
-
-```bash
-git clone https://github.com/AKasprzy/BookNookMobile
-flutter pub get
-flutter run
-```
-
-Aplikacja mobilna komunikuje się z backendem poprzez udostępnione API REST.
